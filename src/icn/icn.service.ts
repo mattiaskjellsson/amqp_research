@@ -33,6 +33,7 @@ export class IcnService {
     var host: string; 
     var port: number; 
     var target: string;
+    
     if(r1.data[ConnectionType.deliveries]?.length > 0) {
       const address = r1.data.deliveries[0].path;
       const r3 = await this.getEndpointsWithRetries(address, 'endpoints');
@@ -40,19 +41,6 @@ export class IcnService {
       host = r3.endpoints[0].host;
       port = r3.endpoints[0].port;
       target = r3.endpoints[0].target;
-      
-      // if (!this.container) {
-      //   this.container = await this.createAMQPContainer(host, port, target);
-      // }
-
-      // if (!this.connection) {
-      //   this.connection = await this.createAMQPConnection(host, port, target);
-      // } 
-       
-      // if (!this.sender) {
-      //   this.sender = this.connection.open_sender({target: { address: target, }});
-      //   this.sender.set_target({ address: target })
-      // }
     } else {
       const r2 = await lastValueFrom(
         this.https.post(
@@ -65,49 +53,41 @@ export class IcnService {
       const d = r2.data[ConnectionType.deliveries][0];
 
       const r3 = await this.getEndpointsWithRetries(d.path, 'endpoints');
-      // { host, port, target} = r3.endpoints[0];
       host = r3.endpoints[0].host;
       port = r3.endpoints[0].port;
       target = r3.endpoints[0].target;
-      // this.container = await this.createAMQPContainer(host, port, target);
-      // this.connection = await this.createAMQPConnection(host, port, target);
-      // this.sender = this.connection.open_sender({ target: { address: target }});
-      // this.sender.set_target({ address: target});
     }
-
-    // this.sender.open();
-
-    // if (!this.sender.is_open()) {
-    //   this.sender.open();
-
-    //   while(!this.sender.is_open()) {
-    //     await setTimeout(1000);
-    //   }
-    // }
-
-    // this.sender.send({ body: message.buffer});
 
     this.container = rhea.create_container();
     this.container.on('message', function (context) {
         console.log(context.message.body);
         context.connection.close();
     });
-    this.container.once('sendable', function (context) {
-        context.sender.send({body:'Hello World!'});
+
+    this.container.on('accepted', function (context) {
+          console.log('all messages confirmed');
+          // context.connection.close();
     });
 
-    this.container.on('disconnect', (context) => {
+    this.container.on('disconnected', function (context) {
+      if (context.error) {
+        console.error('%s %j', context.error, context.error);
+      }
+
       console.log('disconnect');
+      context.connection.close();
     });
 
-    var connection = await this.createAMQPConnection(host, port, target); //this.container.connect({'port':5672});
+    this.container.once('sendable', function (context) {
+        context.sender.send({body: message.buffer});
+    });
 
-    if (!connection.is_open()) {
-      connection.open_sender(target);
-    }
+    this.container.connect(this.createConnectionOptions(host, port, target))
+      .open_sender({ target: { address: target }});
+    
   }
 
-  private async createAMQPConnection(host: string, port: number, target: string) {
+  private createConnectionOptions(host: string, port: number, target: string) {
     const keyFile = this.config.get<string>('key_file'); 
     const certFile = this.config.get<string>('cert_file');
     const caFile = this.config.get<string>('chain_file');
@@ -131,8 +111,9 @@ export class IcnService {
       },
     };
 
-    const connection = this.container.connect(opts);
-    return connection;
+    return opts;
+    // const connection = this.container.connect(opts);
+    // return connection;
   }
 
   private async createAMQPContainer(host: string, port: number, target: string) {

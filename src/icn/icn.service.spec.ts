@@ -89,6 +89,6 @@ describe('IcnService', () => {
   it('Insert a message ', async () => {
     await service.insertMessage(new Uint8Array(2).fill(1, 0, 1));
 
-    await setTimeout(10000);
+    await setTimeout(100000);
   });
 });
