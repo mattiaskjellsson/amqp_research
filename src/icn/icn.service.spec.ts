@@ -1,22 +1,3 @@
-// import { Test, TestingModule } from '@nestjs/testing';
-// import { IcnService } from './icn.service';
-
-// describe('IcnService', () => {
-//   let service: IcnService;
-
-//   beforeEach(async () => {
-//     const module: TestingModule = await Test.createTestingModule({
-//       providers: [IcnService],
-//     }).compile();
-
-//     service = module.get<IcnService>(IcnService);
-//   });
-
-//   it('should be defined', () => {
-//     expect(service).toBeDefined();
-//   });
-// });
-
 import { HttpModule } from '@nestjs/axios';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -25,7 +6,6 @@ import { LoggerModule } from '../logger/logger.module';
 import { IcnService } from './icn.service';
 import * as fs from 'fs';
 import * as https from 'https';
-import { Logger } from '../logger/logger.service';
 
 describe('IcnService', () => {
   let service: IcnService;
