@@ -1,1 +1,0 @@
-MVP connect to AMQP endpoint.
