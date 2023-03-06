@@ -119,6 +119,8 @@ export class IcnService {
       key: this.key,
       cert: this.cert,
       ca: [this.ca],
+      enable_sasl_external: true,
+      timeout: 10000,
       sender_options: { 
         target: {
           address: target

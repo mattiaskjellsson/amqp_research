@@ -40,7 +40,7 @@ describe('IcnService', () => {
         },
       ],
       imports: [
-        HttpModule.registerAsync({useFactory: (config: ConfigService) => {
+        HttpModule.registerAsync({useFactory: () => {
           const keyFile = 'keys/pilotinterchange.eu.tlex.se.dtnwi.digitaltvilling.se.se90009.key.pem';
           const certFile = 'keys/pilotinterchange.eu.tlex.se.dtnwi.digitaltvilling.se.se90009.crt.pem';
           const chainFile = 'keys/chain.pilotinterchange.eu.tlex.se.dtnwi.digitaltvilling.se.se90009.crt.pem';
